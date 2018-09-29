@@ -1,0 +1,15 @@
+#! /bin/bash
+broadcast=$(ip a | grep -o '[0-9]\{0,3\}\.[0-9]\{0,3\}\.[0-9]\{0,3\}\.255' | uniq)
+clear
+printf "Executing nmap on the subnets: \n$broadcast\n"
+candidates=$(
+for brdip in ${broadcast}; do 
+	nmap -sP $brdip/24 | grep -o '[0-9]\{0,3\}\.[0-9]\{0,3\}\.[0-9]\{0,3\}\.[2-9][0-9]\{0,2\}' | uniq
+done)
+printf "\nFound the following candidates: \n$candidates\n"
+for ip in ${candidates}; do
+	printf "\nProbing $ip...\n"
+	ssh -q root@$ip
+done
+clear
+echo "Nothing found"
