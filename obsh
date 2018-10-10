@@ -1,5 +1,5 @@
 #! /bin/bash
-broadcast=$(ip a | grep -o '[0-9]\{0,3\}\.[0-9]\{0,3\}\.[0-9]\{0,3\}\.255' | uniq)
+broadcast=$(ip a | awk '$1 == "inet" &&  $4 !~ /^127/ { print $4"/24" }' | uniq)
 
 RED='\033[0;31m'
 GRAY='\033[0;37m'
@@ -10,7 +10,7 @@ clear
 printf "${GRAY}Executing nmap on the subnets: ${RED}\n$broadcast\n"
 candidates=$(
 for brdip in ${broadcast}; do 
-	nmap -sP $brdip/24 | grep -o '[0-9]\{0,3\}\.[0-9]\{0,3\}\.[0-9]\{0,3\}\.[2-9][0-9]\{0,2\}' | uniq
+	nmap -sP $brdip | awk '$2 == "scan" { print $5 }'
 done)
 printf "${GRAY}\nFound the following candidates: ${GREEN}\n$candidates\n"
 for ip in ${candidates}; do
